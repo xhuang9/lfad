@@ -1,0 +1,13 @@
+node_modules
+dist
+.turbo
+*.tsbuildinfo
+.DS_Store
+.env
+# throwaway demo sandbox (pnpm demo)
+.demo-flow/
+
+# Local LLM-optimised project documentation (never shipped)
+.readme/
+CLAUDE.md
+AGENTS.md

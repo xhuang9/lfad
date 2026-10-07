@@ -1,0 +1,20 @@
+{
+  "name": "lfad",
+  "interface": {
+    "displayName": "Agent Dashboard"
+  },
+  "plugins": [
+    {
+      "name": "lfad",
+      "source": {
+        "source": "local",
+        "path": "./plugins/lfad"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+# Example board.yml — the full 14-step agent dashboard pipeline.
+#
+# DOCUMENTATION ONLY. New boards start with the default nine-step pipeline
+# (idea → research → interview → mock? → design? → todo → doing → review →
+# done); this file shows every knob for a board that wants the whole
+# idea-to-monitor flow.
+# Copy it to <boardRoot>/board.yml and create a folder per step key (or let the
+# daemon create the missing empty folders on start).
+#
+# Rules:
+# - The `steps` array order IS the pipeline order; a step's key IS its
+#   on-disk folder name (todo/, not 5-todo/). The UI shows "5-todo" style
+#   headers from the array position.
+# - `blocked/` and `_archive/` are system directories — never list them here.
+# - type: agent (autopilot advances) | gate (human; complete-in-place) |
+#         queue (no run; autopilot passes through) | terminal (autopilot stops)
+# - row defaults to needs-you for gates and agents for everything else.
+# - skipUnless names a ticket frontmatter boolean; the step is skipped when
+#   the flag is falsy on that ticket. flow:idea sets `needsDesign: true` on
+#   ui-category tickets; custom skipUnless flags round-trip via frontmatter.
+# - agent references a named adapter below; omitted ⇒ the `default` adapter if
+#   present, else the built-in `claude -p` adapter.
+# - skill binds a step to the skill that drives it. The flow plugin ships
+#   library skills for idea / research / interview / mock / design / todo /
+#   doing (flow:idea, flow:research, flow:interview, flow:mock, flow:design,
+#   flow:todo, flow:build) — those are bound below. The other example steps
+#   (checks, add-test, document) leave `skill:` as a commented placeholder:
+#   bind your project's own skill there.
+# - guidance (the board-level top key below, or a per-step `guidance:`) is
+#   operator policy injected into every skill's context via /api/steps,
+#   /api/manual, and the run prompt. Every skill reads and honours it.
+# - Every step writes its files into its OWN step subfolder (research/,
+#   interview/, mock/, design/, …) as NN-<slug>.md; a folder with 2+ files
+#   carries a 00-summary.md entry point; images go in the ticket-level images/.
+#   The root-level context.md is the running hand-off state, rewritten at each
+#   step boundary. `artifact:` hints are omitted — the file convention governs.
+
+version: 1
+
+# Board-level guidance — injected into every skill's context (/api/steps, the
+# run prompt). Here: human-facing prose in Simplified Chinese, English kept for
+# identifiers / paths / code; frontmatter, filenames, and context.md stay English.
+guidance: >
+  Write human-facing prose (idea bodies, interview questions, summaries, review
+  notes) in Simplified Chinese, keeping English for identifiers, file paths, and
+  code. Code, frontmatter, filenames, and context.md stay English.
+
+agents:
+  # Board-level default: any CLI works — the only cross-agent contract is
+  # printing the FLOW_BLOCK:/FLOW_DONE sentinel lines on stdout. Placeholders
+  # {prompt} {model} {effort} {ticketId} {step} {boardRoot} {pluginDir} are
+  # substituted per args token before spawning (no shell).
+  default:
+    cmd: claude
+    args: ["-p", "{prompt}", "--output-format", "stream-json", "--verbose", "--model", "{model}", "--effort", "{effort}", "--plugin-dir", "{pluginDir}"]
+    output: stream-json
+    model: opus
+    effort: high
+  # High-intensity tier for build-grade steps. workflow: true prepends the
+  # word "ultracode" to the prompt (multi-agent orchestration opt-in).
+  deep:
+    cmd: claude
+    args: ["-p", "{prompt}", "--output-format", "stream-json", "--verbose", "--model", "{model}", "--effort", "{effort}", "--plugin-dir", "{pluginDir}"]
+    output: stream-json
+    model: fable
+    effort: xhigh
+    workflow: true
+  # Cheap tier for mechanical steps.
+  light:
+    cmd: claude
+    args: ["-p", "{prompt}", "--output-format", "stream-json", "--verbose", "--model", "{model}", "--plugin-dir", "{pluginDir}"]
+    output: stream-json
+    model: sonnet
+
+steps:
+  - key: idea
+    label: Idea
+    type: agent
+    row: needs-you
+    entry: true
+    skill: flow:idea
+    artifact: body # the ticket body itself is this step's artifact
+  - key: research
+    label: Research
+    type: agent
+    skill: flow:research # agent-only evidence gathering; no human gate
+  - key: interview
+    label: Interview
+    type: gate
+    skill: flow:interview # THE planning-phase human gate
+    guidance: Distil to the fewest sharp questions each round; never restate what the user already told you.
+  - key: mock
+    label: Mock
+    type: gate
+    skipUnless: needsDesign
+    skill: flow:mock # low-fi HTML mock(s)
+  - key: design
+    label: Design
+    type: gate
+    skipUnless: needsDesign
+    skill: flow:design # styled HTML; 00-summary.md embeds shots + links to the .html
+  - key: todo
+    label: Todo
+    type: agent
+    entry: true
+    skill: flow:todo
+  - key: doing
+    label: Doing
+    type: agent
+    skill: flow:build
+    agent: deep
+  - key: checks
+    label: Checks
+    type: agent
+    # skill: my-checks      (bind your project's own skill)
+    agent: light
+  - key: review
+    label: Review
+    type: gate
+    # Per step, `actions:` lists the skills that can process a ticket sitting
+    # there (the drawer's copy-command buttons, ⌃1…⌃9). Bind your own via
+    # /flow:add-skill, e.g. `actions: [flow:next, my-copy-review]`. Omitted ⇒
+    # the step's own skill plus the next step's.
+    actions: [flow:next]
+  - key: add-test
+    label: Add Test
+    type: agent
+    # skill: my-add-test    (bind your project's own skill)
+    agent: light
+  - key: done
+    label: Done
+    type: terminal
+  - key: document
+    label: Document
+    type: agent
+    # skill: my-doc         (bind your project's own skill)
+    agent: light
+  - key: uat
+    label: UAT
+    type: gate
+  - key: monitor
+    label: Monitor
+    type: terminal

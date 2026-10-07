@@ -1,0 +1,30 @@
+{
+  "name": "lfad",
+  "version": "0.1.0",
+  "description": "A dashboard for agent work that uses a folder in your project as the source of truth. Each ticket an agent works on keeps a self-contained folder of markdown notes and screenshots, so you can review the work and remember what was done.",
+  "author": {
+    "name": "xhuang9"
+  },
+  "keywords": [
+    "workflow",
+    "project-management",
+    "agentic"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Agent Dashboard",
+    "shortDescription": "Review agent work as markdown notes and screenshots, kept in your project folder.",
+    "longDescription": "Set up and open a local dashboard that reads a folder in your project. Each ticket an agent works on gets a self-contained folder of markdown notes and screenshots as it moves through research, interview, design, build and review, so you can review the work and remember what was done.",
+    "developerName": "xhuang9",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Set up the agent dashboard for this project.",
+      "Open the agent dashboard.",
+      "Move the next ticket forward."
+    ]
+  }
+}

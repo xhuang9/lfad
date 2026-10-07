@@ -1,0 +1,35 @@
+{
+  "name": "@lfad/runtime",
+  "version": "0.0.0",
+  "type": "module",
+  "bin": {
+    "flow": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/cli.ts src/index.ts --format esm",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@lfad/core": "workspace:*",
+    "@hono/node-server": "^1.13.7",
+    "cac": "^6.7.14",
+    "chokidar": "^4.0.3",
+    "hono": "^4.6.15",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

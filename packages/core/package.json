@@ -1,0 +1,41 @@
+{
+  "name": "@lfad/core",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./keywords": {
+      "import": "./dist/keywords.js",
+      "types": "./dist/keywords.d.ts"
+    },
+    "./build-stages": {
+      "import": "./dist/build-stages.js",
+      "types": "./dist/build-stages.d.ts"
+    },
+    "./runnable": {
+      "import": "./dist/runnable.js",
+      "types": "./dist/runnable.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts src/build-stages.ts src/keywords.ts src/runnable.ts --format esm --dts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "yaml": "^2.9.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

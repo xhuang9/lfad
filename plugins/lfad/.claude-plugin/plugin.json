@@ -1,0 +1,8 @@
+{
+  "name": "lfad",
+  "description": "A dashboard for agent work that uses a folder in your project as the source of truth. Each ticket an agent works on keeps a self-contained folder of markdown notes and screenshots, so you can review the work and remember what was done.",
+  "version": "0.2.0",
+  "author": {
+    "name": "xhuang9"
+  }
+}
