@@ -132,12 +132,12 @@ async function stopDaemon(board, port) {
   }
 
   for (const pid of pids) process.kill(pid, 'SIGTERM')
-  const deadline = Date.now() + 10_000
+  const deadline = Date.now() + 30_000
   while (Date.now() < deadline) {
     if (listenerPids(port).length === 0) return
     await sleep(100)
   }
-  throw new Error(`daemon on port ${port} did not stop within 10 seconds`)
+  throw new Error(`daemon on port ${port} did not stop within 30 seconds`)
 }
 
 async function startDaemon(board, install, port) {
