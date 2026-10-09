@@ -6,6 +6,8 @@ description: Create a NEW skill for an agent-dashboard board and bind it as an a
 
 # lfad:add-skill — author a skill and bind it to a step
 
+Word every file you write by `../move/wording.md` (the reviewer and next-agent rules), within the board's guidance.
+
 A step's `actions:` list in `board.yml` is the source of truth for what can process a ticket sitting there — each entry renders as a **copy-command button** in the drawer (⌃1…⌃9): clicking it copies `/<skill> <ticket-id>` (e.g. `/review-copy 12`) to the clipboard, and the user pastes that into their own Claude Code session to run the skill. This skill grows that list with a **user-defined skill**: ALL of its logic — what it does, what it writes, and **where the ticket moves when it finishes** — lives in the skill file itself. The engine stays mechanism-only: the button copies a command, nothing more; any movement is the skill's own doing (via the `lfad:move` mechanics).
 
 Resolve the board and daemon exactly as `lfad:move` describes.

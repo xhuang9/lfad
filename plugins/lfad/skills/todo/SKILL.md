@@ -13,7 +13,7 @@ Resolve the board, daemon, and CLI exactly as **`lfad:move`** describes.
 
 Acquire the running claim before work and release it on exit, per `lfad:move` (or reuse the enclosing `lfad:next` chain's token).
 
-**Honor the board's guidance** per `lfad:move` in every human-facing file — language, format, tone. Code, frontmatter, filenames, and `context.md` stay English.
+**Honor the board's guidance and word every file by `../move/wording.md`** per `lfad:move` in every human-facing file — language, format, tone. Code, frontmatter, filenames, and `context.md` stay English.
 
 ## Enter: pull-validate the gates
 

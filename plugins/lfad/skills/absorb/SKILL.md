@@ -7,6 +7,8 @@ description: >-
 
 # lfad:absorb — land an external interview into the ticket
 
+Word every file you write by `../move/wording.md` (the reviewer and next-agent rules), within the board's guidance.
+
 The board's `lfad:interview` is not the only place requirements get crystallized. A user may prefer the terminal's `omc:deep-interview` (its Socratic one-question-at-a-time flow with clarity scoring), or settle things in an ordinary chat/QA pass. **absorb is the bridge:** it writes that external result into the ticket's `interview/` file set in the **exact same shape** `lfad:interview` produces, so the pipeline picks it up with no re-asking and no special-casing downstream.
 
 It is deliberately the interview skill's twin: same output contract (§ *The interview/ file set* in `lfad:interview`), same gate. The only difference is the **source** of the understanding — imported, not interviewed live here.

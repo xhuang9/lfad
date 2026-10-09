@@ -1,8 +1,8 @@
 ---
 name: interview
-summary: The planning-phase human gate — restructured understanding, distilled question rounds, a clarity score.
+summary: The planning-phase human gate — skipped by default; asks only real direction forks, each question self-contained.
 description: >-
-  The Interview step playbook — THE planning-phase human gate. Renders a human-explain-style restructured understanding of the ticket (never the idea text copied back), decides implementation/structure/code-level questions itself ("Resolved by agent" lines), and puts ONLY information-architecture and overall-direction forks to the human as question blocks. Multi-round with a "Clarity: NN%" mark per round (threshold ~80%); below threshold the next round RE-DISTILLS into fewer, sharper questions, never more. Also the discuss loop: invoked on a ticket already at interview, it processes the human's answers, updates the files, and rewrites context.md once the gate clears. Auto-invoke when a ticket reaches the interview step, when the user says "interview ticket N", "run the interview", "I've answered the questions / process my answers", or runs /lfad:interview. Question format and movement mechanics defer to lfad:move.
+  The Interview step playbook — THE planning-phase human gate, skipped by default: most tickets clear it with zero questions. Renders a human-explain-style restructured understanding of the ticket (never the idea text copied back), decides implementation/structure/code-level questions itself ("Resolved by agent" lines), and puts ONLY information-architecture and overall-direction forks to the human as question blocks. Multi-round with a "Clarity: NN%" mark per round (threshold ~80%); below threshold the next round RE-DISTILLS into fewer, sharper questions, never more. Also the discuss loop: invoked on a ticket already at interview, it processes the human's answers, updates the files, and rewrites context.md once the gate clears. Auto-invoke when a ticket reaches the interview step, when the user says "interview ticket N", "run the interview", "I've answered the questions / process my answers", or runs /lfad:interview. Question format and movement mechanics defer to lfad:move.
 ---
 
 # lfad:interview — converge understanding into decisions
@@ -13,16 +13,28 @@ Resolve the board, daemon, and CLI exactly as **`lfad:move`** describes; apply i
 
 Acquire the running claim before work and release it on exit, per `lfad:move` (or reuse the enclosing `lfad:next` chain's token).
 
-**Honor the board's guidance** per `lfad:move` in every human-facing file — language, format, tone. Code, frontmatter, filenames, and `context.md` stay English regardless.
+**Honor the board's guidance and word every file by `../move/wording.md`** per `lfad:move` in every human-facing file — language, format, tone. Code, frontmatter, filenames, and `context.md` stay English regardless.
+
+## Skip by default
+
+Most tickets need no interview. Do not go looking for questions. Read the evidence, decide everything you can, and ask only when a real direction fork remains that the ticket, research and code cannot settle.
+
+When no such fork exists, which is the usual case, write `interview/00-summary.md` (Understanding, `Resolved by agent:` lines, `Round 1 — Clarity: NN% (no open forks)`), write no question file, rewrite `context.md` per "When the gate clears", and finish. The gate is cleared with zero open blocks, so the next `lfad:next` carries the ticket straight on. Say in your output that the interview cleared with no questions.
 
 ## Hard rules (the method — follow them literally)
 
 1. **Render a restructured understanding, human-explain style.** Re-express the ticket as what will exist and how it meets the current system — process-level language, a diagram or table where it clarifies, grounded in the research paths. **Never copy the idea text back verbatim**: if your Understanding section could have been produced by quoting the ticket, it isn't understanding yet.
 2. **Split the decision labor.** Implementation, structure, and code-level decisions are **yours**: decide them and record each as a `Resolved by agent: <decision — reason>` line (no slot, nothing for the human to answer). **Only information-architecture and overall-direction decisions become question blocks** — where things live, what the thing fundamentally is, what the user experiences, what the product promises.
-3. **Every question must eliminate a real ambiguity.** Restating information the human already gave as a confirm-question is **BANNED**. Before writing a block, name (to yourself) the two readings it separates; if there is only one reading, there is no question. **If the idea or the user's instructions already settle a fork, it is not a question** — record it as a `Resolved by agent:` line (or, when it maps to an existing block, pre-answer that `Decision:` line), never surface it as an open block. The human's interactive surface stays lean: only what genuinely still needs them (the bl-human-reply principle — the long reasoning lives in the files, the questions stay short and load-bearing).
+3. **Every question must eliminate a real ambiguity.** Restating information the human already gave as a confirm-question is **BANNED**. So is any check of your own reading: "Is this right?", "Does this look correct?", "Are these the right components / is this the right scope?", "Shall I proceed?". The Understanding is there to read; a human who disagrees says so with `lfad:prompt`. Before writing a block, name (to yourself) the two readings it separates; if there is only one reading, there is no question. **If the idea or the user's instructions already settle a fork, it is not a question** — record it as a `Resolved by agent:` line (or, when it maps to an existing block, pre-answer that `Decision:` line), never surface it as an open block. The human's interactive surface stays lean: only what genuinely still needs them (the bl-human-reply principle — the long reasoning lives in the files, the questions stay short and load-bearing).
    - **Shape each block like a deep-interview probe:** target the single weakest / most-forking dimension, **one concept per block**, concrete `options` plus room for free-text; never batch multiple forks into one block.
 4. **Score every round.** Each round ends with a one-line, honestly subjective `Clarity: NN% (<what's solid, what's fuzzy>)` mark, recorded in the round log. The threshold is **~80%**.
-5. **Re-distill, never append.** Below threshold, the next round **replaces** the open question set with *fewer, sharper* questions — fold what the answers taught you back into the understanding and ask only what still forks. The open-block count must not grow round over round.
+5. **Every question is self-contained.** The human answers from the question alone, without opening other tabs or files. The markdown directly above each block (its context, which the input form shows) must carry, in plain words:
+   - what the decision is about and why it matters now;
+   - the current behaviour or fact that creates the fork, stated in full (quote the one line of evidence; never "see research" or "see 00-summary");
+   - what each option means and what changes downstream if it is picked;
+   - your recommendation and the reason.
+   Define every term the question uses. No labels defined elsewhere (`C1`, "the component above", "option B from round 1"). The `ask` line names the thing being decided, and each option reads as a complete choice on its own.
+6. **Re-distill, never append.** Below threshold, the next round **replaces** the open question set with *fewer, sharper* questions — fold what the answers taught you back into the understanding and ask only what still forks. The open-block count must not grow round over round.
 
 ## Question format
 
@@ -41,14 +53,14 @@ On every exit, including an uncleared round, rewrite the CURRENT-STATE block at 
 
 ## Rounds: first pass and the discuss loop
 
-**First pass** (no `interview/` files yet): explore evidence (research set + code), write `00-summary.md` (Understanding + agent-resolved decisions + `Round 1 — Clarity: NN%`) and `01-questions.md` with the round-1 blocks. Round 1 typically carries the most questions it will ever have — still only direction/IA forks, per rule 2.
+**First pass** (no `interview/` files yet): explore evidence (research set + code), write `00-summary.md` (Understanding + agent-resolved decisions + `Round 1 — Clarity: NN%`) and `01-questions.md` with the round-1 blocks. Round 1 usually has zero questions (see "Skip by default"). When it has any, it carries the most it will ever have, still only direction/IA forks per rule 2.
 
 **Discuss loop** (invoked on a ticket already at interview with answers in the files): treat the `Decision:` lines as the human's reply.
 
 1. Re-read the set; process every answered block — align the Understanding, the agent-resolved list, and downstream implications with each answer, honoring written alternatives literally.
 2. Score the round (`Clarity: NN%`) and append it to the round log.
 3. **At/above ~80% and zero open blocks → the gate clears** (see below). At/above threshold with open blocks that answers made moot → resolve them yourself as agent-resolved lines and clear.
-4. **Below threshold** → re-distill (rule 5): rewrite `01-questions.md`'s open set into fewer, sharper blocks and say plainly what round it is and what remains fuzzy.
+4. **Below threshold** → re-distill (rule 6): rewrite `01-questions.md`'s open set into fewer, sharper blocks and say plainly what round it is and what remains fuzzy.
 
 **Two modes.** *Interactive* (`/lfad:interview 12` with a user present): run the rounds live in chat — present the understanding, ask the round's questions, and write the files with the given answers already on their `Decision:` lines; only genuinely unanswered forks stay open. *Board mode* (headless run): write the round's blocks and stop at the gate (`FLOW_DONE` after the files are written); answers arrive via the board (or an inline collection) and a later invocation runs the discuss loop.
 

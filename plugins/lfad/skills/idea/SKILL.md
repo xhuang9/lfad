@@ -11,7 +11,7 @@ This step turns what the user said into a ticket other steps can trust. The one 
 
 Resolve the board, daemon, and CLI exactly as **`lfad:move`** describes (health probe → REST is the primary path; the `FLOW()` CLI helper when the daemon is down). That skill owns all movement grammar; this one owns what a good ticket contains.
 
-**Honor the board's guidance** per `lfad:move` in the human-facing ticket body — language, format, tone (the Rough idea stays in the user's own words either way). Title, category, tags, frontmatter, and filenames stay English.
+**Honor the board's guidance and word every file by `../move/wording.md`** per `lfad:move` in the human-facing ticket body — language, format, tone (the Rough idea stays in the user's own words either way). Title, category, tags, frontmatter, and filenames stay English.
 
 ## The ticket contract
 

@@ -26,7 +26,10 @@ HOME_DIR="${LFAD_HOME:-$HITLOOP_HOME}"
 if [ -z "$HOME_DIR" ]; then
   for d in "$BOARD/.lfad" "$BOARD/.hitloop" "$PWD/lfad" "$PWD/hitloop"; do [ -d "$d/packages" ] && HOME_DIR="$d" && break; done
 fi
-PORT="${LFAD_PORT:-${HITLOOP_PORT:-4319}}"
+# The port: LFAD_PORT, else the tool's .env (each board on a machine needs its own), else 4319.
+PORT="${LFAD_PORT:-$HITLOOP_PORT}"
+[ -z "$PORT" ] && [ -f "$HOME_DIR/.env" ] && PORT=$(sed -n -E 's/^(LFAD|HITLOOP)_PORT=([0-9]+).*/\2/p' "$HOME_DIR/.env" | head -1)
+PORT="${PORT:-4319}"
 BASE="http://localhost:$PORT"
 curl -fsS "$BASE/api/health"                          # {"ok":true} → REST is the path
 ```
@@ -65,6 +68,8 @@ RUNNING_TOKEN=$(printf '%s' "$CLAIM" | jq -r .token)
 | One ticket + its artifacts | `GET /api/tickets/:id` | `FLOW show <id>` |
 
 `/api/steps` returns `{key,label,folder,lateral,type,row,position,entry}` per step — plus per-step `guidance` and the board-level `guidance` when `board.yml` sets them. **`type` is the routing truth**: `agent` (agents work and advance) · `gate` (a human decides; complete in place) · `queue` (pass-through, no run) · `terminal` (the pipeline ends). A step is a human gate exactly when `type` is `"gate"`. The lateral `blocked` step is appended last. `parked` and `_archive` are built-in independent stores, never pipeline steps and never listed here.
+
+**Board guidance.** The board-level and per-step `guidance` set the language, format and tone of every human-facing file a skill writes. Without guidance, write plain English. Code, frontmatter, filenames and `context.md` are always English. Word every file by [`wording.md`](wording.md) beside this skill: one set of rules for the reviewer, the next agent and commit messages.
 
 The default pipeline reads:
 
@@ -148,6 +153,7 @@ options:
 - **Answer format** — the exact bytes the board's input form writes: `**Decision:** <answer> ·YYYY-MM-DD` (one line; the `·` date stamp trails the answer). The board form, a hand edit, and an agent collecting inline all write the same line, so any channel's answer looks identical. An **optional comment** (the human's extra note) follows as one or more `>` blockquote lines directly beneath the Decision line; re-answering replaces that block rather than stacking a new one.
 - **Comment-only answer** — for `option` / `multi`, submitting a typed comment with no option picked records that comment AS the answer: its single-line-collapsed form fills the Decision line (so the gate resolves) while the full comment is kept as the `>` block beneath.
 - The markdown **between the previous question and this one is the question's context** — the UI shows it above the form. Put the evidence and the fork's stakes there, not inside the YAML.
+- **Each question stands alone.** The human must be able to answer from the question and its context without opening another file or tab: state the fact behind the fork in full, define every term, say what each option changes, and give your recommendation. Never point elsewhere ("see research", "as in C1"). Never ask the human to confirm your own reading ("Is this right?"); ask only what has two real answers.
 - `blocked.md` uses the same grammar: an escalated question renders as a question block with an empty Decision line, and the human's answer lands on that line. (An older `blocked.md` may carry only a `**Question:**` line — answer in chat or append a `**Decision:**` line yourself.)
 
 ### Collecting answers (any channel)

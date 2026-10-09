@@ -21,17 +21,17 @@ Resolve `BOARD`, `HOME_DIR` and `PORT` with the block in `lfad:move` ("Find the 
 1. **Resolve the board and tool** with the `lfad:move` block. Confirm `"$HOME_DIR/packages"` exists; if not, ask the user for the tool path. The CLI is `"$HOME_DIR/packages/runtime/dist/cli.js"`, the built UI is `"$HOME_DIR/packages/ui/dist"`.
 2. **Build if needed** (first run only): if `"$HOME_DIR/packages/runtime/dist/cli.js"` or `"$HOME_DIR/packages/ui/dist/index.html"` is missing, build the tool: `pnpm -C "$HOME_DIR" -r build`.
 3. **Check the board** at `$BOARD`. The daemon creates it if missing and, on a fresh board, writes a default `board.yml` (+ the system `blocked`/`parked`/`_archive`) so a new project shows its columns empty — lfad:setup's bootstrap writes the full default pipeline `idea → research → interview → mock → design → todo → doing → review → done` (mock/design gated on `needsDesign`). If it instead has an **old numbered layout** (`0-idea/` …) with no `board.yml`, the daemon refuses to start (fail-fast) — run `/lfad:setup` to migrate first.
-4. **Choose a port** (default `4319`). If something already answers on `http://localhost:4319/api/health`, the board is already running — skip straight to opening it. Otherwise start the daemon **in the background** (do not block the session, and never kill a server you didn't start). No `--ui` needed — the daemon copies the tool's built UI into `<board>/.ui` (gitignored) and serves from there:
+4. **Use `$PORT`** from the `lfad:move` block (the tool's `.env` sets it; default `4319`). If something already answers on `http://localhost:$PORT/api/health`, check `curl -fsS localhost:$PORT/api/info`: when its `boardRoot` is `$BOARD`, the board is already running, so skip straight to opening it. When it is another project's board, do not open it: tell the user the port is taken and to set a free `LFAD_PORT` in `$HOME_DIR/.env`. Otherwise start the daemon **in the background** (do not block the session, and never kill a server you didn't start). No `--ui` needed — the daemon copies the tool's built UI into `<board>/.ui` (gitignored) and serves from there:
    ```bash
-   node "$HOME_DIR/packages/runtime/dist/cli.js" serve "$BOARD" --port 4319
+   node "$HOME_DIR/packages/runtime/dist/cli.js" serve "$BOARD" --port "$PORT"
    ```
-5. **Wait for ready**: poll `http://localhost:4319/api/health` until it returns `{"ok":true}` (≈ a few seconds).
-6. **Open it**: `open http://localhost:4319` (macOS) and tell the user the URL.
+5. **Wait for ready**: poll `http://localhost:$PORT/api/health` until it returns `{"ok":true}` (≈ a few seconds).
+6. **Open it**: `open http://localhost:$PORT` (macOS) and tell the user the URL.
 
 ## Verify it is really up
 
-- `curl -fsS localhost:4319/api/info` returns the board path + resolved config — confirm it points at **this** project's board.
-- `curl -fsS localhost:4319/api/steps` lists the pipeline steps in order; `curl -fsS localhost:4319/api/board` lists the live tickets.
+- `curl -fsS localhost:$PORT/api/info` returns the board path + resolved config — confirm it points at **this** project's board.
+- `curl -fsS localhost:$PORT/api/steps` lists the pipeline steps in order; `curl -fsS localhost:$PORT/api/board` lists the live tickets.
 - The UI's **Manual** modal (`GET /api/manual`) lists the flow skills straight from the plugin, so it always matches the installed library.
 
 ## What the user sees
@@ -46,4 +46,4 @@ Resolve `BOARD`, `HOME_DIR` and `PORT` with the block in `lfad:move` ("Find the 
 
 - The served UI lives at `<board>/.ui` (gitignored, copied from the tool on each serve), so the board folder is self-contained. `LFAD_UI_DIR` can override it.
 - Configuration (port, board location, run-engine vars) is read from a `.env` in the directory you run from; see `$LFAD_HOME/.env.example` and the lfad:setup skill.
-- After updating the tool (`git pull` + rebuild in the install), restart **your own** daemon to pick the new build up: find its PID via the port (`lsof -ti tcp:4319`), stop that PID only, then serve again — never kill a server you didn't start.
+- After updating the tool (`git pull` + rebuild in the install), restart **your own** daemon to pick the new build up: find its PID via the port (`lsof -ti tcp:$PORT`), stop that PID only, then serve again — never kill a server you didn't start.
