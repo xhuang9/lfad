@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import type { KeywordSettings, StepPayload, Ticket } from '../types'
 import { useResolvedOrientation } from '../useBoardLayout'
 import type { CardHint } from './Card'
@@ -87,7 +89,7 @@ export function Board({ tickets, steps, onOpen, onOpenInput, keywords }: BoardPr
       )
     }
     return (
-      <div className={`board-group board-group-${side}`}>
+      <div className={`board-group board-group-${side}`} style={{ '--cols': cols.length } as CSSProperties}>
         <div className="board-group-header">
           <span className="board-group-label">{label}</span>
           <span className="board-group-count">{cols.length}</span>

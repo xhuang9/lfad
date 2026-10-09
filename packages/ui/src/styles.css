@@ -6,6 +6,7 @@
    on their grounds (ink-3 is the floor: ≥4.5:1 at label sizes). */
 
 :root {
+  --col-w: 256px;
   /* high-contrast: pure white grounds, pure black ink, neutral hairlines */
   --bg: #ffffff;
   --bg-tint: #f6f6f6;
@@ -219,7 +220,7 @@ button {
 /* --------------------------------------------------------------- sidebar */
 
 .sidebar {
-  width: 224px;
+  width: 232px;
   flex-shrink: 0;
   background: linear-gradient(180deg, var(--sidebar), var(--bg-tint));
   border-right: 1px solid var(--border);
@@ -227,10 +228,20 @@ button {
   flex-direction: column;
   padding: 16px 13px;
   gap: 20px;
+  overflow: hidden;
+  transition: width 0.22s var(--ease);
+}
+
+/* Only the lists scroll, so a scrollbar never narrows the brand row. */
+.sidebar-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  transition: width 0.22s var(--ease);
 }
 
 /* Images may live in sidebar content: natural size, never wider than the rail. */
@@ -248,8 +259,8 @@ button {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 2px 6px;
+  gap: 8px;
+  padding: 2px 4px;
 }
 
 .brand-mark {
@@ -267,9 +278,13 @@ button {
 }
 
 .brand-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: var(--display);
   font-weight: 600;
-  font-size: 21px;
+  font-size: 17px;
   letter-spacing: -0.015em;
   color: var(--ink);
 }
@@ -732,6 +747,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 0 20px;
   border-bottom: 1px solid var(--border);
   background: var(--glass);
@@ -742,8 +758,17 @@ button {
   display: flex;
   align-items: center;
   gap: 9px;
+  min-width: 0;
   font-weight: 600;
   font-size: 16px;
+  white-space: nowrap;
+}
+
+/* The sidebar already names the app; drop the repeated root crumb where space is short. */
+@media (max-width: 1279px) {
+  .crumb-root {
+    display: none;
+  }
 }
 
 .crumb {
@@ -760,35 +785,13 @@ button {
   display: flex;
   align-items: center;
   gap: 11px;
+  min-width: 0;
 }
 
-.theme-seg {
-  display: inline-flex;
-  border: 1px solid var(--border-strong);
-  border-radius: 9px;
-  overflow: hidden;
-  background: var(--panel);
-  box-shadow: var(--shadow-xs);
+.topbar-actions .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
-
-.theme-seg-btn {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: none;
-  border-right: 1px solid var(--border);
-  background: transparent;
-  color: var(--ink-3);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  transition: background 0.15s, color 0.15s;
-}
-
-.theme-seg-btn:last-child { border-right: none; }
-.theme-seg-btn:hover { background: var(--panel-2); color: var(--ink); }
-.theme-seg-btn.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
@@ -796,7 +799,9 @@ button {
 }
 
 .search {
+  flex: 0 1 230px;
   width: 230px;
+  min-width: 140px;
   height: 36px;
   padding: 0 13px;
   border: 1px solid var(--border-strong);
@@ -1152,8 +1157,10 @@ button {
 
 /* Landscape half: a horizontal group header on top, then the columns in a
    horizontal-scroll wrapper (the kanban model is preserved inside each half). */
+/* Each half starts at the width its columns need (--cols is set per group), so a
+   one-column half never takes half the board or scrolls its only column. */
 .board-group {
-  flex: 1;
+  flex: 1 1 calc(var(--cols, 1) * (var(--col-w) + 14px) + 16px);
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -1228,7 +1235,7 @@ button {
 }
 
 .column {
-  width: 256px;
+  width: var(--col-w);
   flex-shrink: 0;
   height: 100%;
   max-height: 100%;
@@ -1238,6 +1245,12 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   animation: col-rise 0.5s var(--ease) both;
+}
+
+@media (max-width: 1279px) {
+  :root {
+    --col-w: 220px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -63,98 +63,100 @@ export function Sidebar({ view, onView, collapsed, onToggle, categoryFilter, onT
         </button>
       </div>
 
-      <nav className="nav" aria-label="Primary navigation">
-        {NAV.map((n) => {
-          const Icon = n.icon
-          return (
-            <button
-              key={n.key}
-              className={`nav-item ${view === n.key ? 'nav-active' : ''}`}
-              onClick={() => onView(n.key)}
-              aria-current={view === n.key ? 'page' : undefined}
-            >
-              {Icon ? <Icon className="nav-icon" aria-hidden="true" /> : <span className="nav-text-mark" aria-hidden="true">P</span>}
-              {!collapsed && <span className="nav-label">{n.label}</span>}
-              {!collapsed && n.key === 'board' && (
-                <span className="nav-count" title="Tickets on the board">
-                  {tickets.length}
-                </span>
-              )}
-              {!collapsed && n.key === 'archive' && (
-                <span className="nav-count" title="Tickets in _archive">
-                  {archiveCount}
-                </span>
-              )}
-              {!collapsed && n.key === 'parked' && (
-                <span className="nav-count" title="Tickets in parked">
-                  {parkedCount}
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </nav>
-
-      {!collapsed && (
-        <>
-          <div className="filters">
-            <p className="filters-head">Category</p>
-            {CATEGORIES.map((c) => (
-              <label key={c} className="filter-row">
-                <input type="checkbox" checked={categoryFilter.has(c)} onChange={() => onToggleCategory(c)} />
-                <span className="swatch" style={{ background: CATEGORY_COLORS[c] }} aria-hidden="true" />
-                <span className="filter-label">{c}</span>
-              </label>
-            ))}
-          </div>
-
-          <div className="filters keyword-filters">
-            <div className="filters-head keyword-filters-head">
-              <span>Keywords</span>
-              <button className="keyword-config" type="button" onClick={onConfigureKeywords} aria-label="Configure project keywords" title="Configure keywords">
-                <Cog aria-hidden="true" />
+      <div className="sidebar-body">
+        <nav className="nav" aria-label="Primary navigation">
+          {NAV.map((n) => {
+            const Icon = n.icon
+            return (
+              <button
+                key={n.key}
+                className={`nav-item ${view === n.key ? 'nav-active' : ''}`}
+                onClick={() => onView(n.key)}
+                aria-current={view === n.key ? 'page' : undefined}
+              >
+                {Icon ? <Icon className="nav-icon" aria-hidden="true" /> : <span className="nav-text-mark" aria-hidden="true">P</span>}
+                {!collapsed && <span className="nav-label">{n.label}</span>}
+                {!collapsed && n.key === 'board' && (
+                  <span className="nav-count" title="Tickets on the board">
+                    {tickets.length}
+                  </span>
+                )}
+                {!collapsed && n.key === 'archive' && (
+                  <span className="nav-count" title="Tickets in _archive">
+                    {archiveCount}
+                  </span>
+                )}
+                {!collapsed && n.key === 'parked' && (
+                  <span className="nav-count" title="Tickets in parked">
+                    {parkedCount}
+                  </span>
+                )}
               </button>
-            </div>
-            {keywords.items.length === 0 ? (
-              <div className="keyword-empty">
-                <strong>No keywords yet</strong>
-                <span>Configure project filters and card colours.</span>
-                <button onClick={onConfigureKeywords}>Configure</button>
-              </div>
-            ) : (
-              <div className="keyword-list">
-                {keywords.items.map((keyword) => {
-                  const normalized = normalizeKeyword(keyword.word)
-                  return (
-                    <label key={normalized} className={`filter-row keyword-row ${keywordFilter.has(normalized) ? 'keyword-row-on' : ''}`}>
-                      <input type="checkbox" checked={keywordFilter.has(normalized)} onChange={() => onToggleKeyword(keyword.word)} />
-                      <span className="swatch keyword-swatch" style={{ color: keyword.color, background: keyword.color }} aria-hidden="true" />
-                      <span className="filter-label">{keyword.word}</span>
-                      <span className="keyword-count">{keywordCounts.get(normalized) ?? 0}</span>
-                    </label>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </>
-      )}
+            )
+          })}
+        </nav>
 
-      <button className="manual-btn" onClick={onManual} aria-label="Open the FAQ (skills & board help)">
-        <span className="manual-btn-icon" aria-hidden="true">
-          ?
-        </span>
-        {!collapsed && <span>FAQ</span>}
-      </button>
+        {!collapsed && (
+          <>
+            <div className="filters">
+              <p className="filters-head">Category</p>
+              {CATEGORIES.map((c) => (
+                <label key={c} className="filter-row">
+                  <input type="checkbox" checked={categoryFilter.has(c)} onChange={() => onToggleCategory(c)} />
+                  <span className="swatch" style={{ background: CATEGORY_COLORS[c] }} aria-hidden="true" />
+                  <span className="filter-label">{c}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="filters keyword-filters">
+              <div className="filters-head keyword-filters-head">
+                <span>Keywords</span>
+                <button className="keyword-config" type="button" onClick={onConfigureKeywords} aria-label="Configure project keywords" title="Configure keywords">
+                  <Cog aria-hidden="true" />
+                </button>
+              </div>
+              {keywords.items.length === 0 ? (
+                <div className="keyword-empty">
+                  <strong>No keywords yet</strong>
+                  <span>Configure project filters and card colours.</span>
+                  <button onClick={onConfigureKeywords}>Configure</button>
+                </div>
+              ) : (
+                <div className="keyword-list">
+                  {keywords.items.map((keyword) => {
+                    const normalized = normalizeKeyword(keyword.word)
+                    return (
+                      <label key={normalized} className={`filter-row keyword-row ${keywordFilter.has(normalized) ? 'keyword-row-on' : ''}`}>
+                        <input type="checkbox" checked={keywordFilter.has(normalized)} onChange={() => onToggleKeyword(keyword.word)} />
+                        <span className="swatch keyword-swatch" style={{ color: keyword.color, background: keyword.color }} aria-hidden="true" />
+                        <span className="filter-label">{keyword.word}</span>
+                        <span className="keyword-count">{keywordCounts.get(normalized) ?? 0}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        <button className="manual-btn" onClick={onManual} aria-label="Open the FAQ (skills & board help)">
+          <span className="manual-btn-icon" aria-hidden="true">
+            ?
+          </span>
+          {!collapsed && <span>FAQ</span>}
+        </button>
+      </div>
 
       {version && (
         <div className="sidebar-foot">
           {collapsed ? (
-            <span className="version-num" title="Installed flow version">{version}</span>
+            <span className="version-num" title="Installed lfad version">{version}</span>
           ) : (
-            <span className="version" title="Installed flow version — live from GET /api/info">
+            <span className="version" title="Installed lfad version — live from GET /api/info">
               <Diamond className="version-dot" aria-hidden="true" />
-              <span className="version-name">Flow</span>
+              <span className="version-name">lfad</span>
               <span className="version-num">v{version}</span>
             </span>
           )}

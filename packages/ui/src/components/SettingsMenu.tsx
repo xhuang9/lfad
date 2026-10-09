@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Cog } from 'lucide-react'
 
+import { applyTheme, storedTheme, type ThemeChoice } from '../theme'
 import { getBoardLayoutSnapshot, getCommandPrefixSnapshot, loadBoardLayout, loadCommandPrefix, setBoardLayout, setCommandPrefix, subscribeBoardLayout, subscribeCommandPrefix, type BoardLayout, type CommandPrefix } from '../api'
 
 const MENU_ID = 'topbar-settings-menu'
@@ -13,6 +14,7 @@ export function SettingsMenu({ onConfigurePrompts }: SettingsMenuProps) {
   const [open, setOpen] = useState(false)
   const [prefixAvailable, setPrefixAvailable] = useState(true)
   const [layoutAvailable, setLayoutAvailable] = useState(true)
+  const [theme, setTheme] = useState<ThemeChoice>(storedTheme)
   const prefix = useSyncExternalStore(subscribeCommandPrefix, getCommandPrefixSnapshot)
   const layout = useSyncExternalStore(subscribeBoardLayout, getBoardLayoutSnapshot)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -51,6 +53,11 @@ export function SettingsMenu({ onConfigurePrompts }: SettingsMenuProps) {
     setBoardLayout(choice).then(() => setLayoutAvailable(true)).catch(() => setLayoutAvailable(false))
   }
 
+  const chooseTheme = (choice: ThemeChoice): void => {
+    applyTheme(choice)
+    setTheme(choice)
+  }
+
   const configurePrompts = (): void => {
     setOpen(false)
     onConfigurePrompts()
@@ -73,6 +80,15 @@ export function SettingsMenu({ onConfigurePrompts }: SettingsMenuProps) {
       </button>
       {open ? (
         <div id={MENU_ID} className="settings-popover" role="menu" aria-label="Settings">
+          <div className="settings-label">Theme</div>
+          <div className="settings-prefix" role="group" aria-label="Theme">
+            {([['system', 'System'], ['light', 'Light'], ['dark', 'Dark']] as const).map(([choice, label]) => (
+              <button key={choice} className={`settings-prefix-btn ${theme === choice ? 'on' : ''}`} type="button" onClick={() => chooseTheme(choice)} aria-pressed={theme === choice}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="settings-divider" />
           <div className="settings-label">Command prefix</div>
           <div className="settings-prefix" role="group" aria-label="Command target" title={prefixAvailable ? 'Copied command prefix' : 'Requires a daemon restart'}>
             {([['/', 'Claude Code'], ['$', 'Codex']] as const).map(([choice, label]) => (

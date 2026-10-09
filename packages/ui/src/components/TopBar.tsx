@@ -1,24 +1,6 @@
-import { useState, type RefObject } from 'react'
+import type { RefObject } from 'react'
 
 import { SettingsMenu } from './SettingsMenu'
-
-type ThemeChoice = 'system' | 'light' | 'dark'
-const THEME_KEY = 'lfad-theme'
-
-function storedTheme(): ThemeChoice {
-  const value = localStorage.getItem(THEME_KEY)
-  return value === 'light' || value === 'dark' ? value : 'system'
-}
-
-function applyTheme(choice: ThemeChoice): void {
-  if (choice === 'system') {
-    localStorage.removeItem(THEME_KEY)
-    document.documentElement.removeAttribute('data-theme')
-  } else {
-    localStorage.setItem(THEME_KEY, choice)
-    document.documentElement.dataset.theme = choice
-  }
-}
 
 interface TopBarProps {
   title: string
@@ -45,37 +27,16 @@ interface TopBarProps {
 }
 
 export function TopBar({ title, search, onSearch, onNew, onConfigurePrompts, onNextAll, nextAllCopied, nextAllCount, needsActionOn, onToggleNeedsAction, needsActionCount, showNeedsAction, runningCount, searchRef }: TopBarProps) {
-  const [theme, setTheme] = useState<ThemeChoice>(storedTheme)
-
-  const chooseTheme = (choice: ThemeChoice): void => {
-    applyTheme(choice)
-    setTheme(choice)
-  }
-
   return (
     <header className="topbar">
       <div className="topbar-title">
-        <span className="crumb">Agent Dashboard</span>
-        <span className="crumb-sep" aria-hidden="true">
+        <span className="crumb crumb-root">Agent Dashboard</span>
+        <span className="crumb-sep crumb-root" aria-hidden="true">
           ▸
         </span>
         <span>{title}</span>
       </div>
       <div className="topbar-actions">
-        <div className="theme-seg" role="group" aria-label="Theme">
-          {(['system', 'light', 'dark'] as const).map((choice) => (
-            <button
-              key={choice}
-              className={`theme-seg-btn ${theme === choice ? 'on' : ''}`}
-              onClick={() => chooseTheme(choice)}
-              aria-label={`${choice[0].toUpperCase()}${choice.slice(1)}`}
-              aria-pressed={theme === choice}
-              title={choice === 'system' ? 'System (follow OS)' : `${choice[0].toUpperCase()}${choice.slice(1)}`}
-            >
-              {choice === 'system' ? '▣' : choice === 'light' ? '☀' : '☾'}
-            </button>
-          ))}
-        </div>
         <input
           ref={searchRef}
           className="search"
