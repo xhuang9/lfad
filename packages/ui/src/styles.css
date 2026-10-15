@@ -1153,6 +1153,15 @@ button {
 
 .board-landscape {
   flex-direction: row;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+/* A half holding an expanded column grows to fit every card, and the whole
+   board scrolls sideways in its place. */
+.board-group.has-expanded {
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 /* Landscape half: a horizontal group header on top, then the columns in a
@@ -1161,7 +1170,8 @@ button {
    one-column half never takes half the board or scrolls its only column. */
 .board-group {
   flex: 1 1 calc(var(--cols, 1) * (var(--col-w) + 14px) + 16px);
-  min-width: 0;
+  /* Never narrower than one column, so an expanded neighbour cannot crush it. */
+  min-width: calc(var(--col-w) + 32px);
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -1336,6 +1346,66 @@ button {
   flex-direction: column;
   gap: 9px;
   scrollbar-width: thin;
+}
+
+/* Expanded column: the body flows cards top to bottom, then into a new card
+   column to the right, so every card shows at the row's height. vertical-lr
+   makes the wrap axis vertical and lets the body grow wider as it wraps; the
+   cards keep normal horizontal text. The row scrolls sideways when it overflows. */
+.column.is-expanded {
+  width: auto;
+  min-width: var(--col-w);
+}
+
+.column.is-expanded .column-body {
+  writing-mode: vertical-lr;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  overflow: hidden auto;
+}
+
+.column.is-expanded .column-body > * {
+  writing-mode: horizontal-tb;
+  width: calc(var(--col-w) - 18px);
+}
+
+.column-head-lead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.column-expand {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink-3);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.column-expand:hover {
+  background: var(--panel);
+  border-color: var(--border);
+  color: var(--ink);
+}
+
+.column-expand.is-on {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.column-expand svg {
+  width: 15px;
+  height: 15px;
 }
 
 .column-empty {
