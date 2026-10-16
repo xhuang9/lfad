@@ -54,6 +54,7 @@ describe('@lfad/runtime server (default seeded board)', () => {
       row: 'needs-you',
       position: 0,
       entry: true,
+      entryWhen: 'Raw or unshaped intent, or anything that fits no later entry step.',
       skill: 'lfad:idea',
       actions: ['lfad:next'],
     })
@@ -1195,10 +1196,8 @@ describe('POST /api/tickets entryStep on a multi-entry board', () => {
 
   beforeAll(async () => {
     boardRoot = mkdtempSync(join(tmpdir(), 'lfad-multientry-'))
+    // The default board's entry steps: idea (the default), interview and todo.
     seedBoard(boardRoot)
-    // Flag a second entry step BEFORE the server starts: idea (default) + todo.
-    const configPath = join(boardRoot, BOARD_CONFIG_FILE)
-    writeFileSync(configPath, readFileSync(configPath, 'utf8').replace(/- key: todo/, '- key: todo\n    entry: true'))
     server = await createServer({ boardRoot }).start(0)
     base = `http://127.0.0.1:${server.port}`
   })
@@ -1209,7 +1208,7 @@ describe('POST /api/tickets entryStep on a multi-entry board', () => {
   })
 
   it('accepts every entry-flagged step and still rejects a non-entry one', async () => {
-    for (const entryStep of ['idea', 'todo']) {
+    for (const entryStep of ['idea', 'interview', 'todo']) {
       const res = await fetch(`${base}/api/tickets`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -1633,6 +1632,13 @@ describe('guidance: board.yml guidance reaches /api/steps, /api/manual, and the 
     expect(body.guidance).toBe('Ship small, verified slices.')
     expect(body.steps.find((s) => s.key === 'doing')?.guidance).toBe('Run the full gate before FLOW_DONE.')
     expect(body.steps.find((s) => s.key === 'todo')?.guidance).toBeUndefined()
+  })
+
+  it('GET /api/steps carries entryWhen on entry steps only', async () => {
+    const res = await fetch(`${base}/api/steps`)
+    const body = (await res.json()) as { steps: StepPayload[] }
+    expect(body.steps.find((s) => s.key === 'todo')?.entryWhen).toMatch(/fully specified/)
+    expect(body.steps.find((s) => s.key === 'research')?.entryWhen).toBeUndefined()
   })
 
   it('GET /api/steps carries resolved writing languages and the absolute localRules path', async () => {

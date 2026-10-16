@@ -105,6 +105,7 @@ steps:
     type: agent
     row: needs-you
     entry: true
+    entryWhen: Raw or unshaped intent, or anything that fits no later entry step.
     skill: __PREFIX__:idea
     actions:
       - __PREFIX__:next
@@ -119,6 +120,8 @@ steps:
     label: Interview
     type: gate
     row: needs-you
+    entry: true
+    entryWhen: The outcome and the code to change are already known, and only direction choices for a person remain.
     skill: __PREFIX__:interview
     actions:
       - __PREFIX__:next
@@ -142,6 +145,8 @@ steps:
     label: Todo
     type: agent
     row: agents
+    entry: true
+    entryWhen: "The work is fully specified: what to change, where, and how to check it, with no open decisions."
     skill: __PREFIX__:todo
     actions:
       - __PREFIX__:next

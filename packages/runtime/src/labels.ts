@@ -21,6 +21,8 @@ export interface StepPayload {
   position: number
   /** True when tickets may be created directly into this step. */
   entry: boolean
+  /** When a new ticket should start here (entry steps only). */
+  entryWhen?: string
   /** The skill bound to this step (drives the drawer's run-action buttons). */
   skill?: string
   /** Skills that can process a ticket sitting here — the drawer's buttons, in order. */
@@ -47,6 +49,7 @@ export function stepsPayload(config: BoardConfig): StepPayload[] {
     row: s.row,
     position: i,
     entry: s.entry === true,
+    ...(s.entryWhen !== undefined ? { entryWhen: s.entryWhen } : {}),
     ...(s.skill !== undefined ? { skill: s.skill } : {}),
     ...(s.actions !== undefined ? { actions: s.actions } : {}),
     ...(s.guidance !== undefined ? { guidance: s.guidance } : {}),

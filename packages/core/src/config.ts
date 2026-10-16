@@ -83,6 +83,8 @@ export interface StepConfig {
   artifact?: string
   /** True when tickets may be created directly into this step. */
   entry?: boolean
+  /** When a new ticket should start here: read by the `new` skill to pick the landing step. Needs `entry: true`. */
+  entryWhen?: string
   /** Named adapter reference; must exist in `agents`. Absent ⇒ 'default' adapter if present, else built-in. */
   agent?: string
   /** Ticket frontmatter boolean flag name; the step is skipped when the flag is falsy. */
@@ -166,12 +168,12 @@ export function defaultBoardConfig(prefix = DEFAULT_SKILL_PREFIX): BoardConfig {
     version: 1,
     agents: {},
     steps: [
-      { key: 'idea', label: 'Idea', type: 'agent', row: 'needs-you', entry: true, skill: `${prefix}:idea`, actions: [`${prefix}:next`] },
+      { key: 'idea', label: 'Idea', type: 'agent', row: 'needs-you', entry: true, entryWhen: 'Raw or unshaped intent, or anything that fits no later entry step.', skill: `${prefix}:idea`, actions: [`${prefix}:next`] },
       { key: 'research', label: 'Research', type: 'agent', row: 'agents', skill: `${prefix}:research`, actions: [`${prefix}:next`] },
-      { key: 'interview', label: 'Interview', type: 'gate', row: 'needs-you', skill: `${prefix}:interview`, actions: [`${prefix}:next`] },
+      { key: 'interview', label: 'Interview', type: 'gate', row: 'needs-you', entry: true, entryWhen: 'The outcome and the code to change are already known, and only direction choices for a person remain.', skill: `${prefix}:interview`, actions: [`${prefix}:next`] },
       { key: 'mock', label: 'Mock', type: 'gate', row: 'needs-you', skill: `${prefix}:mock`, skipUnless: 'needsDesign', actions: [`${prefix}:next`] },
       { key: 'design', label: 'Design', type: 'gate', row: 'needs-you', skill: `${prefix}:design`, skipUnless: 'needsDesign', actions: [`${prefix}:next`] },
-      { key: 'todo', label: 'Todo', type: 'agent', row: 'agents', skill: `${prefix}:todo`, actions: [`${prefix}:next`] },
+      { key: 'todo', label: 'Todo', type: 'agent', row: 'agents', entry: true, entryWhen: 'The work is fully specified: what to change, where, and how to check it, with no open decisions.', skill: `${prefix}:todo`, actions: [`${prefix}:next`] },
       { key: 'doing', label: 'Doing', type: 'agent', row: 'agents', skill: `${prefix}:build`, actions: [`${prefix}:next`] },
       { key: 'review', label: 'Review', type: 'gate', row: 'needs-you', skill: `${prefix}:review`, actions: [`${prefix}:next`] },
       { key: 'done', label: 'Done', type: 'terminal', row: 'agents' },
@@ -218,6 +220,7 @@ const stepConfigSchema = z
     guidance: z.string().optional(),
     artifact: z.string().optional(),
     entry: z.boolean().optional(),
+    entryWhen: z.string().min(1).optional(),
     agent: z.string().optional(),
     skipUnless: z.string().optional(),
   })
@@ -253,6 +256,13 @@ const boardConfigSchema = z
         })
       }
       seen.add(step.key)
+      if (step.entryWhen !== undefined && step.entry !== true) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['steps', i, 'entryWhen'],
+          message: `step '${step.key}' sets entryWhen but not entry: true`,
+        })
+      }
       if (step.agent !== undefined && data.agents[step.agent] === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -331,6 +341,7 @@ function toSerializable(config: BoardConfig): Record<string, unknown> {
     if (step.guidance !== undefined) entry.guidance = step.guidance
     if (step.artifact !== undefined) entry.artifact = step.artifact
     if (step.entry === true) entry.entry = true
+    if (step.entryWhen !== undefined) entry.entryWhen = step.entryWhen
     if (step.agent !== undefined) entry.agent = step.agent
     if (step.skipUnless !== undefined) entry.skipUnless = step.skipUnless
     return entry

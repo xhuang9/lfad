@@ -36,6 +36,7 @@ Shape it like the flow skills:
 1. Edit `<board>/board.yml`: find the target step and append the skill name to its `actions:` list (create the list if absent — mind the existing order; first entry = ⌃1).
 2. VALIDATE before finishing: `node -e "import(process.argv[1]).then(m => { m.loadBoardConfig(process.argv[2]); console.log('ok') })" "<tool>/packages/core/dist/index.js" "<board>"` — an invalid edit is rejected by the daemon (it keeps the previous config), so fix and re-validate.
 3. The running daemon hot-reloads the config (`config-changed` SSE) — the new button appears without a restart.
+4. If the bound step is not an entry step, ask whether new tickets may start there. If yes, set `entry: true` and an `entryWhen` line saying when, so `lfad:new` can start tickets there. Validate again.
 
 ## Report
 

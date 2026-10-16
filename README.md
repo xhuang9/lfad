@@ -114,6 +114,7 @@ steps:
 
 - `type` decides routing: `agent` steps run and advance, `gate` steps wait for you, `queue` passes through and `terminal` ends the pipeline.
 - A step's `key` is its folder name. Array order is pipeline order.
+- `entry: true` lets tickets be created straight into a step, and `entryWhen` says when they should. `/lfad:new` matches a new ticket against those lines and starts it in the latest step that fits, so a quick fix with a settled plan can start at `todo`.
 - `skipUnless` applies a step only when a ticket flag is set. The default `mock` and `design` steps apply only to tickets marked `needsDesign`.
 - Editing `board.yml` while the daemon runs reloads the pipeline without a restart. An invalid edit is rejected and the previous config stays.
 - Skills write in English by default, in short, plain sentences. A board can override that without touching the plugin: `writing` sets the language of files a person reads and files an agent reads, `guidance` adds board or step rules, and `localRules` names a project rules file, by convention a project skill at `.claude/skills/lfad-local/SKILL.md`, that wins wherever it conflicts with the plugin's rules. `/lfad:override` puts each change in the right one of these places.

@@ -67,7 +67,7 @@ The title recomposes the outcome while retaining the prompt's distinctive `entri
 
 1. `GET /api/steps` and collect the steps with `entry: true` (in pipeline order). On the default board that is `idea`.
 2. One entry step → use it (or simply omit `entryStep`; the board's default entry applies).
-3. Several entry steps → route by readiness: **fuzzy or unshaped intent enters at the earliest entry step** (it needs the upstream steps); **an already-specified, directly actionable task may enter at a later entry step** (e.g. a `todo`-style queue) — confirm that choice with the user in one line before creating.
+3. Several entry steps → this skill uses the first one, unless the user names another. To let the agent pick the step from each step's `entryWhen`, use `lfad:new`.
 
 ## Create it
 

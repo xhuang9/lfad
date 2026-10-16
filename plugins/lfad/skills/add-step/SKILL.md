@@ -66,6 +66,7 @@ steps:                        # array order IS pipeline order
     goal: "Done when …"       # optional; one-line done-criteria injected into the agent prompt
     artifact: notes.md        # legacy single-file mode (a filename, or the literal `body`); normally omit — steps write a `<key>/NN-{slug}.md` file set instead (see the artifact interview note)
     entry: true               # optional; tickets may be created directly into this step
+    entryWhen: "…"            # optional, needs entry: true; when lfad:new should start a ticket here
     agent: deep               # optional; must name an adapter in `agents` (omit ⇒ default adapter)
     skipUnless: needsDesign   # optional; ticket frontmatter boolean — the step is skipped when falsy
 ```
@@ -93,7 +94,7 @@ Interview the definition one field at a time (skip a field when the answer is ob
 6. **skill** — which skill powers the step (any skill name, including one the user wrote). Optional; informational for the prompt.
 7. **goal** — the one-line done-criteria injected into the agent's prompt (e.g. `"Done when the repo's quality gate passes on the ticket's worktree."`).
 8. **artifact** — where the step's outputs land. The convention: the step's skill writes a **file set** into the ticket's step subfolder (`<ticket>/<key>/NN-{slug}.md`, numbered from `00`; the board's content rail groups them under the step) — that needs no `artifact:` field, so normally **omit it**. The single-filename `artifact:` (`notes.md`) and the literal `body` (the ticket body) stay supported as legacy for steps whose skill writes exactly one file.
-9. **entry** — may tickets be created directly into this step? (`entry: true`.)
+9. **entry** — may tickets be created directly into this step? (`entry: true`.) If yes, ask **when**: one line for `entryWhen`, such as "The work is fully specified, with no open decisions." `lfad:new` matches each new ticket against these lines to pick its starting step, so a step without `entryWhen` is chosen only when the user names it. `entryWhen` without `entry: true` is rejected.
 10. **agent adapter** — for an `agent`-type step, which named adapter runs it. Show the current `agents` names (`GET /api/steps` won't list them — read `board.yml`). If none fits, **offer to define a new adapter**: `cmd`, `args` (with the placeholders), optional `model`, `effort`, `output`, `workflow`. Omit `agent:` to inherit the board's `default` adapter.
 11. **skipUnless** — optional: name a ticket frontmatter boolean flag; the step is skipped for tickets where it is falsy (e.g. `needsDesign`).
 

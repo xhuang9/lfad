@@ -90,7 +90,10 @@ steps:
     label: Idea
     type: agent
     row: needs-you
-    entry: true
+    entry: true # tickets may be created directly into this step
+    # When a new ticket should start here. /lfad:new matches the user's intent
+    # against every entry step's entryWhen and picks the latest that fits.
+    entryWhen: Raw or unshaped intent, or anything that fits no later entry step.
     skill: flow:idea
     artifact: body # the ticket body itself is this step's artifact
   - key: research
@@ -100,6 +103,8 @@ steps:
   - key: interview
     label: Interview
     type: gate
+    entry: true
+    entryWhen: The outcome and the code to change are already known, and only direction choices for a person remain.
     skill: flow:interview # THE planning-phase human gate
     guidance: Distil to the fewest sharp questions each round; never restate what the user already told you.
   - key: mock
@@ -116,6 +121,7 @@ steps:
     label: Todo
     type: agent
     entry: true
+    entryWhen: "The work is fully specified: what to change, where, and how to check it, with no open decisions."
     skill: flow:todo
   - key: doing
     label: Doing

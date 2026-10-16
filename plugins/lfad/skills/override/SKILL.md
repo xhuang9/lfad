@@ -23,6 +23,7 @@ Each change goes in the narrowest layer that fits. Later layers win.
 | One short rule for every step | `board.yml` → board-level `guidance` | One or two sentences |
 | One short rule for one step | `board.yml` → that step's `guidance` | One or two sentences |
 | A longer policy: wording rules, what agents decide versus ask, project conventions, anything over two sentences | The `lfad-local` skill | Markdown sections, see below |
+| Let new tickets start at a step, or change when they do | `board.yml` → that step's `entry: true` and `entryWhen` | One line saying when a ticket starts there. `lfad:new` reads it |
 | A new column, or a change to a step's type, order or skill | `lfad:add-step` | |
 | A new action button on a step | `lfad:add-skill` | |
 

@@ -135,6 +135,21 @@ describe('parseBoardConfig', () => {
     expect(resolveLocalRules('/abs/rules.md', '/p/.flow')).toBe('/abs/rules.md')
   })
 
+  it('accepts entryWhen on an entry step', () => {
+    const config = parseBoardConfig({
+      version: 1,
+      steps: [{ key: 'todo', label: 'Todo', type: 'agent', entry: true, entryWhen: 'The work is fully specified.' }],
+    })
+    expect(config.steps[0]?.entryWhen).toBe('The work is fully specified.')
+  })
+
+  it('rejects entryWhen on a step that is not an entry step', () => {
+    expect(() => parseBoardConfig({
+      version: 1,
+      steps: [{ key: 'todo', label: 'Todo', type: 'agent', entryWhen: 'The work is fully specified.' }],
+    })).toThrow(/entryWhen/)
+  })
+
   it('rejects duplicate step keys', () => {
     const raw = minimalRaw()
     ;(raw.steps as Record<string, unknown>[]).push({ key: 'todo', label: 'Todo 2', type: 'queue' })
@@ -212,6 +227,9 @@ describe('loadBoardConfig', () => {
     expect(stepByKey(config, 'mock')?.skipUnless).toBe('needsDesign')
     expect(stepByKey(config, 'design')?.skipUnless).toBe('needsDesign')
     expect(defaultEntryStep(config)).toBe('idea')
+    // idea, interview and todo are entry steps, each saying when a ticket starts there.
+    expect(config.steps.filter((s) => s.entry === true).map((s) => s.key)).toEqual(['idea', 'interview', 'todo'])
+    expect(config.steps.filter((s) => s.entry === true).every((s) => (s.entryWhen ?? '').length > 0)).toBe(true)
     expect(config.agents).toEqual({}) // built-in claude adapter applies
   })
 
@@ -353,6 +371,13 @@ describe('writeBoardConfig', () => {
 
     const yamlText = readFileSync(join(root, BOARD_CONFIG_FILE), 'utf8')
     expect(yamlText).toContain('guidance: No scope creep, ever.')
+  })
+
+  it('round-trips entryWhen through disk', () => {
+    const config = makeTestConfig()
+    config.steps = config.steps.map((s) => (s.entry === true ? { ...s, entryWhen: 'Fully specified work.' } : s))
+    writeBoardConfig(root, config)
+    expect(loadBoardConfig(root)).toEqual(config)
   })
 
   it('round-trips writing and localRules through disk', () => {
