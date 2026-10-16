@@ -468,12 +468,6 @@ button {
   transform: translateY(1px);
 }
 
-.keyword-list {
-  max-height: 222px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-
 .keyword-row-on {
   background: var(--accent-soft);
 }
