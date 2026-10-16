@@ -30,6 +30,8 @@ import {
   setBody,
   setStepNote,
   setWorktree,
+  resolveLocalRules,
+  resolveWriting,
   stepKeys,
   updateFrontmatter,
   unparkTicket,
@@ -350,6 +352,8 @@ export function buildApp(deps: AppDeps): Hono {
     return c.json({
       steps: stepsPayload(config),
       ...(config.guidance !== undefined ? { guidance: config.guidance } : {}),
+      writing: resolveWriting(config.writing),
+      ...(config.localRules !== undefined ? { localRules: resolveLocalRules(config.localRules, boardRoot) } : {}),
     })
   })
 

@@ -15,7 +15,7 @@ import {
   readdirSync,
   readFileSync,
 } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml'
 import { z } from 'zod'
 
@@ -89,11 +89,49 @@ export interface StepConfig {
   skipUnless?: string
 }
 
+/**
+ * The languages a board's skills write in. An unset field inherits the plugin
+ * default, English.
+ */
+export interface WritingConfig {
+  /** Language for files a person reads: research, interview, review, doing notes, question blocks. */
+  humanLanguage?: string
+  /** Language for files an agent reads: context.md, todo chunks, SKILL.md files, commit messages. */
+  agentLanguage?: string
+}
+
+/** WritingConfig with the plugin defaults filled in. */
+export interface ResolvedWriting {
+  humanLanguage: string
+  agentLanguage: string
+}
+
+export const DEFAULT_WRITING_LANGUAGE = 'English'
+
+/** Fills the plugin defaults into a board's `writing` settings. */
+export function resolveWriting(writing: WritingConfig | undefined): ResolvedWriting {
+  return {
+    humanLanguage: writing?.humanLanguage ?? DEFAULT_WRITING_LANGUAGE,
+    agentLanguage: writing?.agentLanguage ?? DEFAULT_WRITING_LANGUAGE,
+  }
+}
+
+/** Absolute path of a board's `localRules` file. Relative paths resolve from the
+ *  project root, which is the board folder's parent. */
+export function resolveLocalRules(localRules: string | undefined, boardRoot: string): string | undefined {
+  return localRules === undefined ? undefined : resolve(dirname(resolve(boardRoot)), localRules)
+}
+
 /** The full parsed `board.yml`: named adapters plus the ordered step array. */
 export interface BoardConfig {
   version: 1
   /** Free-form board-level guidance injected into every step prompt. */
   guidance?: string
+  /** Languages that override the plugin default (English) for this board. */
+  writing?: WritingConfig
+  /** Project rules file, relative to the project root. Every skill reads it after the plugin's
+   *  own rules; where the two conflict, this file wins. */
+  localRules?: string
   /** Filled by parse; `{}` when the agents section is absent. */
   agents: Record<string, AgentAdapter>
   steps: StepConfig[]
@@ -193,6 +231,14 @@ const boardConfigSchema = z
   .object({
     version: z.literal(1),
     guidance: z.string().optional(),
+    writing: z
+      .object({
+        humanLanguage: z.string().min(1).optional(),
+        agentLanguage: z.string().min(1).optional(),
+      })
+      .strict()
+      .optional(),
+    localRules: z.string().min(1).optional(),
     agents: z.record(agentAdapterSchema).default({}),
     steps: z.array(stepConfigSchema).min(1),
   })
@@ -259,6 +305,8 @@ export function parseBoardConfig(data: unknown): BoardConfig {
 function toSerializable(config: BoardConfig): Record<string, unknown> {
   const out: Record<string, unknown> = { version: config.version }
   if (config.guidance !== undefined) out.guidance = config.guidance
+  if (config.writing !== undefined) out.writing = config.writing
+  if (config.localRules !== undefined) out.localRules = config.localRules
   const agentNames = Object.keys(config.agents)
   if (agentNames.length > 0) {
     const agents: Record<string, unknown> = {}

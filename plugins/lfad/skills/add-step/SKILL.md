@@ -10,7 +10,7 @@ A board's steps are **data, not code**: `<board>/board.yml` declares the ordered
 
 Two invariants shape everything below:
 
-1. **`board.yml` is the single source of truth for the steps.** Unlike tickets (which always route through the daemon or the `flow` CLI), `board.yml` is a plain config file you edit **directly on disk**. There is no REST endpoint for it.
+1. **`board.yml` is the single source of truth for the steps.** Unlike tickets (which always route through the daemon or the `flow` CLI), `board.yml` is a plain config file you edit **directly on disk**. There is no REST endpoint for it. It also holds board-wide keys (`guidance`, `writing`, `localRules`; see `docs/board.example.yml`): keep them unchanged when editing steps.
 2. **The daemon hot-reloads it.** A watcher notices the `board.yml` write, revalidates, swaps the config, and emits a `config-changed` SSE event — the board updates with **no restart**. An *invalid* edit is rejected and the daemon keeps the previous config, so **always validate before you rely on the change**.
 
 Write the `steps:` key; the loader also accepts the legacy `stages:` alias on read (old boards) and normalizes it — new writes always use `steps:`.

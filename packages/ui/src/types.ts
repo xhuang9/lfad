@@ -139,11 +139,15 @@ export interface StepPayload {
   skipUnless?: string
 }
 
-/** The GET /api/steps payload: the column list plus board-level guidance. */
+/** The GET /api/steps payload: the column list plus board-level guidance and writing settings. */
 export interface BoardSteps {
   steps: StepPayload[]
   /** Free-form board-level guidance from board.yml. */
   guidance?: string
+  /** Languages for person-facing and agent-facing files, English unless board.yml overrides. */
+  writing?: { humanLanguage: string; agentLanguage: string }
+  /** Absolute path of the project rules file, when board.yml sets `localRules`. */
+  localRules?: string
 }
 
 /** One markdown artifact returned by GET /api/tickets/:id. */

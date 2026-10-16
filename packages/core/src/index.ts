@@ -31,9 +31,11 @@ export type {
   AdapterOutput,
   AgentAdapter,
   BoardConfig,
+  ResolvedWriting,
   StepConfig,
   StepRow,
   StepType,
+  WritingConfig,
 } from './config.js'
 
 export {
@@ -41,6 +43,7 @@ export {
   BUILT_IN_ADAPTER,
   DEFAULT_BOARD_CONFIG,
   DEFAULT_SKILL_PREFIX,
+  DEFAULT_WRITING_LANGUAGE,
   adapterForStep,
   defaultBoardConfig,
   defaultEntryStep,
@@ -52,6 +55,8 @@ export {
   loadBoardConfig,
   nextStep,
   parseBoardConfig,
+  resolveLocalRules,
+  resolveWriting,
   stepByKey,
   stepKeys,
   verifyConfigMatchesDisk,

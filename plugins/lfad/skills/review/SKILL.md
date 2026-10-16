@@ -36,7 +36,7 @@ Anything missing → do not draft an approval-ready packet; state plainly what i
 
 ## 2. Draft the review packet — `review.md`
 
-Write `<ticket>/review.md` via `PUT /api/tickets/:id/artifact` (`{"name":"review.md","content":…}`; daemon down → write the file directly). **Honor the board's guidance and word every file by `../move/wording.md`** (language, tone; code/paths/commands stay English). Structure. Changed-file paths and git commands must be inline code so the board's shared click-to-copy treatment applies to both:
+Write `<ticket>/review.md` via `PUT /api/tickets/:id/artifact` (`{"name":"review.md","content":…}`; daemon down → write the file directly). **Write every file by `../move/wording.md`, which layers the board's `writing`, `guidance` and `localRules` over the plugin defaults** (language, tone; code/paths/commands stay English). Structure. Changed-file paths and git commands must be inline code so the board's shared click-to-copy treatment applies to both:
 
 ```markdown
 # Review — <ticket title>  ·  stage <N> / <total>

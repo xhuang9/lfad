@@ -34,7 +34,7 @@ Match the action to the instruction; keep the ticket's existing contracts intact
 
 ## Record the exchange
 
-Both the prompt and its outcome live on the ticket (audit trail, survives sessions). Write under `prompt/` (**Honor the board's guidance and word every file by `../move/wording.md`** — language/tone; code/paths English):
+Both the prompt and its outcome live on the ticket (audit trail, survives sessions). Write under `prompt/` (**Write every file by `../move/wording.md`, which layers the board's `writing`, `guidance` and `localRules` over the plugin defaults** — language/tone; code/paths English):
 
 - **`prompt/NN-{slug}.md`** — the instruction + its reference (the target artifact/section/quote), if not already written by the UI.
 - **`prompt/NN-{slug}.result.md`** — what you did: the edits/commits (hashes or dry-run diff state), the analysis, or the answer. Reference any worktree diff (`git -C <worktree> diff`) rather than pasting it.

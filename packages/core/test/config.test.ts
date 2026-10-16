@@ -29,6 +29,8 @@ import {
   loadBoardConfig,
   nextStep,
   parseBoardConfig,
+  resolveLocalRules,
+  resolveWriting,
   stepByKey,
   stepKeys,
   verifyConfigMatchesDisk,
@@ -105,6 +107,32 @@ describe('parseBoardConfig', () => {
     expect(config.guidance).toBe('Keep every change surgical.')
     expect(stepByKey(config, 'doing')?.guidance).toBe('Run the full gate before finishing.')
     expect(stepByKey(config, 'todo')?.guidance).toBeUndefined()
+  })
+
+  it('accepts writing languages and a localRules path', () => {
+    const raw = minimalRaw()
+    raw.writing = { humanLanguage: 'Simplified Chinese', agentLanguage: 'English' }
+    raw.localRules = '.claude/skills/lfad-local/SKILL.md'
+    const config = parseBoardConfig(raw)
+    expect(config.writing).toEqual({ humanLanguage: 'Simplified Chinese', agentLanguage: 'English' })
+    expect(config.localRules).toBe('.claude/skills/lfad-local/SKILL.md')
+  })
+
+  it('rejects an unknown writing key, so a typo cannot silently fall back to English', () => {
+    const raw = minimalRaw()
+    raw.writing = { humanLanguge: 'Simplified Chinese' }
+    expect(() => parseBoardConfig(raw)).toThrow()
+  })
+
+  it('resolveWriting fills English for unset languages', () => {
+    expect(resolveWriting(undefined)).toEqual({ humanLanguage: 'English', agentLanguage: 'English' })
+    expect(resolveWriting({ humanLanguage: 'Simplified Chinese' })).toEqual({ humanLanguage: 'Simplified Chinese', agentLanguage: 'English' })
+  })
+
+  it('resolveLocalRules resolves from the project root, the board folder\'s parent', () => {
+    expect(resolveLocalRules(undefined, '/p/.flow')).toBeUndefined()
+    expect(resolveLocalRules('.claude/skills/lfad-local/SKILL.md', '/p/.flow')).toBe('/p/.claude/skills/lfad-local/SKILL.md')
+    expect(resolveLocalRules('/abs/rules.md', '/p/.flow')).toBe('/abs/rules.md')
   })
 
   it('rejects duplicate step keys', () => {
@@ -325,6 +353,14 @@ describe('writeBoardConfig', () => {
 
     const yamlText = readFileSync(join(root, BOARD_CONFIG_FILE), 'utf8')
     expect(yamlText).toContain('guidance: No scope creep, ever.')
+  })
+
+  it('round-trips writing and localRules through disk', () => {
+    const config = makeTestConfig()
+    config.writing = { humanLanguage: 'Simplified Chinese' }
+    config.localRules = '.claude/skills/lfad-local/SKILL.md'
+    writeBoardConfig(root, config)
+    expect(loadBoardConfig(root)).toEqual(config)
   })
 
   it('refuses to persist an invalid config', () => {

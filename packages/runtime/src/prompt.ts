@@ -11,7 +11,7 @@
  * same string, so it is trivially testable.
  */
 
-import type { Step, StepConfig, Ticket } from '@lfad/core'
+import type { ResolvedWriting, Step, StepConfig, Ticket } from '@lfad/core'
 
 import type { Artifact } from './artifacts.js'
 import type { RunConfig } from './run-config.js'
@@ -31,6 +31,10 @@ export interface PromptContext {
   skillPrefix?: string
   /** Board-level `guidance` from board.yml, injected into every step prompt. */
   boardGuidance?: string
+  /** The board's writing settings with plugin defaults filled in. */
+  writing?: ResolvedWriting
+  /** Absolute path of the board's project rules file, when board.yml sets `localRules`. */
+  localRules?: string
 }
 
 /** Renders one artifact as a fenced section for the prompt. */
@@ -68,6 +72,12 @@ export function buildStepPrompt(
   lines.push(`Step goal: ${stepConfig?.goal ?? `Complete the '${step}' step of this ticket.`}`)
   if (ctx.boardGuidance !== undefined) lines.push(`Board guidance: ${ctx.boardGuidance}`)
   if (stepConfig?.guidance !== undefined) lines.push(`Step guidance: ${stepConfig.guidance}`)
+  if (ctx.writing !== undefined) {
+    lines.push(`Writing: files a person reads in ${ctx.writing.humanLanguage}; files an agent reads in ${ctx.writing.agentLanguage}.`)
+  }
+  if (ctx.localRules !== undefined) {
+    lines.push(`Project rules: read ${ctx.localRules} after the plugin's rules. Where they conflict, the project rules win.`)
+  }
   const configuredSkill = ctx.skillOverride ?? stepConfig?.skill
   const actionSkill = ctx.skillPrefix !== undefined
     ? configuredSkill?.replace(/^(?:flow|lfad):/, () => `${ctx.skillPrefix}:`)

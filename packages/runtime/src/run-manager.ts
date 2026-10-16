@@ -43,6 +43,8 @@ import {
   readBoard as coreReadBoard,
   readTicket as coreReadTicket,
   setBlocked as coreSetBlocked,
+  resolveLocalRules,
+  resolveWriting,
   stepByKey,
   stepKeys,
   type AdapterOutput,
@@ -363,6 +365,8 @@ export class RunManager {
       ...(boardTicketDir !== undefined ? { boardTicketDir } : {}),
       ...(record.skillOverride !== undefined ? { skillOverride: record.skillOverride } : {}),
       ...(config.guidance !== undefined ? { boardGuidance: config.guidance } : {}),
+      writing: resolveWriting(config.writing),
+      ...(config.localRules !== undefined ? { localRules: resolveLocalRules(config.localRules, this.#boardRoot) } : {}),
     })
     const adapter = adapterForStep(config, step)
     const invocation = buildAdapterInvocation(adapter, prompt, {

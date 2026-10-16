@@ -26,9 +26,12 @@
 #   flow:todo, flow:build) — those are bound below. The other example steps
 #   (checks, add-test, document) leave `skill:` as a commented placeholder:
 #   bind your project's own skill there.
-# - guidance (the board-level top key below, or a per-step `guidance:`) is
-#   operator policy injected into every skill's context via /api/steps,
-#   /api/manual, and the run prompt. Every skill reads and honours it.
+# - How skills write stacks in layers, each overriding the one above:
+#   1. plugin defaults: English, and plugins/lfad/skills/move/wording.md;
+#   2. this board: `writing` languages, board-level `guidance`, and the
+#      `localRules` project file;
+#   3. a step's own `guidance:`, the most specific.
+#   All of them reach every skill via /api/steps and the run prompt.
 # - Every step writes its files into its OWN step subfolder (research/,
 #   interview/, mock/, design/, …) as NN-<slug>.md; a folder with 2+ files
 #   carries a 00-summary.md entry point; images go in the ticket-level images/.
@@ -37,13 +40,22 @@
 
 version: 1
 
-# Board-level guidance — injected into every skill's context (/api/steps, the
-# run prompt). Here: human-facing prose in Simplified Chinese, English kept for
-# identifiers / paths / code; frontmatter, filenames, and context.md stay English.
+# Languages. Unset fields stay English. humanLanguage covers files a person
+# reads (research, interview, review, doing notes, question blocks);
+# agentLanguage covers files an agent reads (context.md, todo chunks, SKILL.md
+# files, commit messages). Code, frontmatter keys and filenames stay English.
+writing:
+  humanLanguage: Simplified Chinese, keeping technical terms, identifiers, paths and code in English
+  agentLanguage: English
+
+# Project rules file, relative to the project root (the board folder's parent).
+# Every skill reads it after the plugin's own rules; where they conflict, this
+# file wins. Use it for project wording rules, autonomy limits and the like.
+localRules: .claude/skills/lfad-local/SKILL.md
+
+# Board-level guidance: short operator policy added to every skill's context.
 guidance: >
-  Write human-facing prose (idea bodies, interview questions, summaries, review
-  notes) in Simplified Chinese, keeping English for identifiers, file paths, and
-  code. Code, frontmatter, filenames, and context.md stay English.
+  Keep every change surgical; ask before adding a dependency.
 
 agents:
   # Board-level default: any CLI works — the only cross-agent contract is

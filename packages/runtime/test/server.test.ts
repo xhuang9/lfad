@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 import { BOARD_CONFIG_FILE, loadBoardConfig, writeBoardConfig, type Ticket } from '@lfad/core'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -1614,7 +1614,7 @@ describe('guidance: board.yml guidance reaches /api/steps, /api/manual, and the 
     // Add board-level + step-level guidance to the seeded board.yml before boot.
     const configPath = join(boardRoot, BOARD_CONFIG_FILE)
     const yamlText = readFileSync(configPath, 'utf8')
-      .replace('version: 1', 'version: 1\nguidance: Ship small, verified slices.')
+      .replace('version: 1', 'version: 1\nguidance: Ship small, verified slices.\nwriting:\n  humanLanguage: Simplified Chinese\nlocalRules: .claude/skills/lfad-local/SKILL.md')
       .replace('- key: doing\n    label: Doing', '- key: doing\n    label: Doing\n    guidance: Run the full gate before FLOW_DONE.')
     writeFileSync(configPath, yamlText)
     server = await createServer({ boardRoot }).start(0)
@@ -1633,6 +1633,13 @@ describe('guidance: board.yml guidance reaches /api/steps, /api/manual, and the 
     expect(body.guidance).toBe('Ship small, verified slices.')
     expect(body.steps.find((s) => s.key === 'doing')?.guidance).toBe('Run the full gate before FLOW_DONE.')
     expect(body.steps.find((s) => s.key === 'todo')?.guidance).toBeUndefined()
+  })
+
+  it('GET /api/steps carries resolved writing languages and the absolute localRules path', async () => {
+    const res = await fetch(`${base}/api/steps`)
+    const body = (await res.json()) as { writing: { humanLanguage: string, agentLanguage: string }, localRules?: string }
+    expect(body.writing).toEqual({ humanLanguage: 'Simplified Chinese', agentLanguage: 'English' })
+    expect(body.localRules).toBe(join(dirname(boardRoot), '.claude/skills/lfad-local/SKILL.md'))
   })
 
   it('GET /api/manual includes the board-level guidance', async () => {
@@ -1669,6 +1676,13 @@ describe('guidance: board.yml guidance reaches /api/steps, /api/manual, and the 
     expect(goalIndex).toBeGreaterThan(-1)
     expect(lines[goalIndex + 1]).toBe('Board guidance: Board-level rule.')
     expect(lines[goalIndex + 2]).toBe('Step guidance: Step-level rule.')
+
+    const withWriting = buildStepPrompt(ticket, [], 'doing', stepConfig, { dryRun: true, autopilot: false, timeoutMs: 1000, killGraceMs: 2000 }, {
+      writing: { humanLanguage: 'Simplified Chinese', agentLanguage: 'English' },
+      localRules: '/p/.claude/skills/lfad-local/SKILL.md',
+    })
+    expect(withWriting).toContain('Writing: files a person reads in Simplified Chinese; files an agent reads in English.')
+    expect(withWriting).toContain("Project rules: read /p/.claude/skills/lfad-local/SKILL.md after the plugin's rules. Where they conflict, the project rules win.")
 
     // Without guidance, neither line appears.
     const bare = buildStepPrompt(ticket, [], 'doing', { ...stepConfig, guidance: undefined }, { dryRun: true, autopilot: false, timeoutMs: 1000, killGraceMs: 2000 })

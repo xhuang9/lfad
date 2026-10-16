@@ -1,16 +1,34 @@
 # Wording rules
 
-Every file an lfad skill writes follows these rules. Board guidance (see "Board guidance" in `SKILL.md` beside this file) sets the language, spelling variant, format and tone. These rules set the wording inside that. Without guidance, write plain English and match the spelling variant the project's own docs use.
+The plugin's default way of writing: **short, easy to read and informative**. Every sentence tells the reader something they need, in plain words, and nothing more.
+
+## How the rules stack
+
+Each layer overrides the one above it. Read them in this order before writing:
+
+1. **Plugin defaults**: this file, and English for every file.
+2. **Board settings** in `board.yml`, read from `GET /api/steps` (or `board.yml` itself when the daemon is down):
+   - `writing.humanLanguage` sets the language of files a person reads (the reviewer's files below).
+   - `writing.agentLanguage` sets the language of files an agent reads (the next agent's and the developer's files below).
+   - `guidance`, at board level, adds rules for every step.
+   - `localRules` names a project rules file (`/api/steps` returns its absolute path). Read it after this file. Where the two conflict, the project file wins, for wording and for anything else it covers.
+3. **Step `guidance`** on the step being worked, which is the most specific.
+
+An unset setting inherits the layer above it. If `localRules` names a missing file, say so in your output and continue with the layers that exist.
+
+When the human-facing language is not English, apply these rules in that language. The English word lists below are examples of the habits to avoid in any language.
 
 ## Pick the reader
 
-Each file has one reader. Apply the rules below for every reader, then that reader's section.
+Each file has one reader, which also decides its language. Apply the rules below for every reader, then that reader's section.
 
-| Reader | Files |
-| --- | --- |
-| **The reviewer**, the person working the board | Ticket artifacts: `research/`, `interview/`, `mock/`, `design/`, `todo/` summaries, `doing/` notes, `review/` packets, `prompt/` replies, `blocked.md`, question blocks |
-| **The next agent** | `context.md`, the CURRENT-STATE block, the `todo/` breakdown chunks, project-local `SKILL.md` files written by `lfad:add-skill` |
-| **A developer** | Commit messages, branch descriptions, code comments |
+| Reader | Language setting | Files |
+| --- | --- | --- |
+| **The reviewer**, the person working the board | `humanLanguage` | Ticket artifacts: `research/`, `interview/`, `mock/`, `design/`, `todo/` summaries, `doing/` notes, `review/` packets, `prompt/` replies, `blocked.md`, question blocks, the ticket body |
+| **The next agent** | `agentLanguage` | `context.md`, the CURRENT-STATE block, the `todo/` breakdown chunks, project-local `SKILL.md` files written by `lfad:add-skill` |
+| **A developer** | `agentLanguage` | Commit messages, branch descriptions, code comments |
+
+Code, identifiers, frontmatter keys and filenames stay English whatever the settings say.
 
 ## What never changes
 
@@ -91,6 +109,7 @@ Drop information only under a stated limit, such as the `context.md` line cap. T
 
 A busy person deciding from the board. They read the first line and the left edge of each bullet, and act on what is in front of them.
 
+- **Short, easy to read, informative.** Say what the reviewer needs to know or decide, in everyday words, and stop. Leave out process narration ("I read the files, then…") and anything they would not miss. Short never means vague: keep every number, name and fact they may act on.
 - **Lead with what they must do, then the answer.** The first line of a review packet, a `blocked.md` or a step note says what is needed from them, or what is now true when nothing is.
 - **Show what now works.** Name the changed behaviour and how to see it: "Exports now include archived rows. Open `/reports`, tick Archived, export." A list of edited files is evidence, and goes last.
 - **Errors as location, cause, fix.** "Test fails at `auth.spec.ts:42`: expected 200, got 401. Cause: missing auth header. Fix: send the `Authorization` header."
@@ -121,5 +140,6 @@ It reads every word literally and shares no memory of this session. Anything not
 - The reader is named and that reader's section was applied.
 - The first sentence of each unit carries its point. No preamble, recap or pleasantries.
 - No em dashes, no contrast framing, no paragraph over the limit, no repeated word in consecutive sentences.
+- The file is in the language its reader's setting names, and any `localRules` file was applied.
 - Every number, path and name unchanged, and every hedge in the source still a hedge.
 - Anything dropped is named.

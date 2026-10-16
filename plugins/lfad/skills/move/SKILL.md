@@ -69,7 +69,7 @@ RUNNING_TOKEN=$(printf '%s' "$CLAIM" | jq -r .token)
 
 `/api/steps` returns `{key,label,folder,lateral,type,row,position,entry}` per step — plus per-step `guidance` and the board-level `guidance` when `board.yml` sets them. **`type` is the routing truth**: `agent` (agents work and advance) · `gate` (a human decides; complete in place) · `queue` (pass-through, no run) · `terminal` (the pipeline ends). A step is a human gate exactly when `type` is `"gate"`. The lateral `blocked` step is appended last. `parked` and `_archive` are built-in independent stores, never pipeline steps and never listed here.
 
-**Board guidance.** The board-level and per-step `guidance` set the language, format and tone of every human-facing file a skill writes. Without guidance, write plain English. Code, frontmatter, filenames and `context.md` are always English. Word every file by [`wording.md`](wording.md) beside this skill: one set of rules for the reviewer, the next agent and commit messages.
+**How skills write.** Every human-facing and agent-facing file follows [`wording.md`](wording.md) beside this skill. It defines the layers a board can override: plugin defaults (English), then `board.yml`'s `writing` languages, `guidance` and `localRules` project file, then step `guidance`. `GET /api/steps` returns `writing` (with defaults filled in) and the absolute `localRules` path. Code, frontmatter keys and filenames are always English.
 
 The default pipeline reads:
 

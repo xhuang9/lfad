@@ -116,6 +116,7 @@ steps:
 - A step's `key` is its folder name. Array order is pipeline order.
 - `skipUnless` applies a step only when a ticket flag is set. The default `mock` and `design` steps apply only to tickets marked `needsDesign`.
 - Editing `board.yml` while the daemon runs reloads the pipeline without a restart. An invalid edit is rejected and the previous config stays.
+- Skills write in English by default, in short, plain sentences. A board can override that without touching the plugin: `writing` sets the language of files a person reads and files an agent reads, `guidance` adds board or step rules, and `localRules` names a project rules file that wins wherever it conflicts with the plugin's rules.
 
 Every new board starts with the default nine-step pipeline. [`docs/board.example.yml`](./docs/board.example.yml) documents every option.
 
