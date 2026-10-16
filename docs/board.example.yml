@@ -51,6 +51,7 @@ writing:
 # Project rules file, relative to the project root (the board folder's parent).
 # Every skill reads it after the plugin's own rules; where they conflict, this
 # file wins. Use it for project wording rules, autonomy limits and the like.
+# /lfad:override writes it.
 localRules: .claude/skills/lfad-local/SKILL.md
 
 # Board-level guidance: short operator policy added to every skill's context.
