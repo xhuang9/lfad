@@ -272,6 +272,7 @@ export function App() {
           sectionSlug={route.section}
           anchor={route.anchor}
           steps={steps}
+          keywords={keywords}
           boardVersion={version}
           readOnly={openTicketArchived || openTicketParked}
           lifecycleAction={openTicketParked ? 'restore' : openTicketArchived || openTicketBlocked ? undefined : 'park'}

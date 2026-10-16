@@ -1617,7 +1617,8 @@ button {
   opacity: 0.8;
 }
 
-.card-tag-run .card-tag-matched {
+.card-tag-run .card-tag-matched,
+.drawer-meta .card-tag-matched {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1660,7 +1661,8 @@ button {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 30%, transparent);
 }
 
-[data-theme='dark'] .card-tag-run .card-tag-matched {
+[data-theme='dark'] .card-tag-run .card-tag-matched,
+[data-theme='dark'] .drawer-meta .card-tag-matched {
   background: color-mix(in srgb, var(--keyword-color) 22%, var(--panel));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--keyword-color) 40%, transparent);
 }
@@ -1670,7 +1672,8 @@ button {
     box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 30%, transparent);
   }
 
-  :root:not([data-theme='light']) .card-tag-run .card-tag-matched {
+  :root:not([data-theme='light']) .card-tag-run .card-tag-matched,
+  :root:not([data-theme='light']) .drawer-meta .card-tag-matched {
     background: color-mix(in srgb, var(--keyword-color) 22%, var(--panel));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--keyword-color) 40%, transparent);
   }
@@ -2077,6 +2080,7 @@ button.hint-question:hover {
 }
 
 .drawer-meta .card-tag {
+  margin-right: 0;
   padding: 3px 10px;
   border-radius: 8px;
   font-size: 13px;

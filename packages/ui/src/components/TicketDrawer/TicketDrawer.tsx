@@ -2,14 +2,15 @@
 // action cluster, and the shortcuts together, and renders the header + the
 // rail/doc body. The heavy lifting lives in hooks/ and components/.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, ChevronLeft, X } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, X } from 'lucide-react'
 
-import type { Artifact, AutomationLevel, StepPayload, Ticket } from '../../types'
+import type { Artifact, AutomationLevel, KeywordSettings, StepPayload, Ticket } from '../../types'
 import { CATEGORY_BADGES } from '../../types'
 import { clearRunning } from '../../api'
 import { useResolvedOrientation } from '../../useBoardLayout'
 import { DEPENDENCIES_SECTION_SLUG } from '../../dependencies'
+import { cardTags } from '../../keywords'
 import { MANUAL_TASKS_FILE } from '../../manualTasks'
 import { deriveNextActionLabel } from '../../nextActionLabel'
 import { useCopied } from '../../useCopied'
@@ -44,6 +45,8 @@ interface TicketDrawerProps {
   /** Heading id to scroll into view once the section renders. */
   anchor: string | null
   steps: StepPayload[]
+  /** Project keywords, so matching tags carry the same colour as on the card. */
+  keywords: KeywordSettings
   /** Bumps on every board change — drives the live detail refetch. */
   boardVersion: number
   /** Browse-only mode (the ticket lives in the `_archive` cold store): no
@@ -60,7 +63,7 @@ interface TicketDrawerProps {
   onSection: (slug: string, anchor?: string) => void
 }
 
-export function TicketDrawer({ ticketId, sectionSlug, anchor, steps, boardVersion, readOnly = false, candidates, archivedCandidates, lifecycleAction, onLifecycleAction, onClose, onSection }: TicketDrawerProps) {
+export function TicketDrawer({ ticketId, sectionSlug, anchor, steps, keywords, boardVersion, readOnly = false, candidates, archivedCandidates, lifecycleAction, onLifecycleAction, onClose, onSection }: TicketDrawerProps) {
   // Input mode replaces the rail/doc body with the question flow. While an
   // answer draft is in progress the live detail refetch is held (the same
   // guard the inline editor uses) so a board change never clobbers typing.
@@ -266,9 +269,15 @@ export function TicketDrawer({ ticketId, sectionSlug, anchor, steps, boardVersio
               </div>
               <h1 className="drawer-title">{ticket.title}</h1>
               <div className="drawer-meta">
-                {ticket.tags.map((t) => (
-                  <span key={t} className="card-tag">
-                    {t}
+                {cardTags(ticket.tags, { ...keywords, maxShown: ticket.tags.length }).visible.map(({ tag, keyword }) => (
+                  <span
+                    key={tag}
+                    className={`card-tag${keyword === undefined ? '' : ' card-tag-matched'}`}
+                    style={keyword === undefined ? undefined : { '--keyword-color': keyword.color } as CSSProperties}
+                    title={keyword === undefined ? undefined : `Matches project keyword: ${keyword.word}`}
+                  >
+                    {keyword === undefined ? null : <span className="card-tag-seed" aria-hidden="true" />}
+                    {tag}
                   </span>
                 ))}
               </div>
@@ -315,8 +324,12 @@ export function TicketDrawer({ ticketId, sectionSlug, anchor, steps, boardVersio
             title={expandLabel}
           >
             {isSide
-              ? <ChevronLeft className="drawer-expand-icon" aria-hidden="true" />
-              : <ChevronDown className="drawer-expand-icon" aria-hidden="true" />}
+              ? (expanded
+                ? <ChevronRight className="drawer-expand-icon" aria-hidden="true" />
+                : <ChevronLeft className="drawer-expand-icon" aria-hidden="true" />)
+              : (expanded
+                ? <ChevronDown className="drawer-expand-icon" aria-hidden="true" />
+                : <ChevronUp className="drawer-expand-icon" aria-hidden="true" />)}
             {showHints && <kbd className="kbd-hint kbd-hint-float">⌘⇧F</kbd>}
           </button>
           <button className="drawer-close" onClick={onClose} aria-label="Close (Esc)" title="Close (Esc)">
